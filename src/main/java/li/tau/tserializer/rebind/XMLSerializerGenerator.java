@@ -35,7 +35,7 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 		super.addImports(classSourceFileComposerFactory);
 		classSourceFileComposerFactory.addImport("com.google.gwt.xml.client.*");
 		classSourceFileComposerFactory.addImport("com.google.gwt.json.client.*");
-		classSourceFileComposerFactory.addImport("li.tau.serializer.client.xml.*");
+		classSourceFileComposerFactory.addImport("li.tau.tserializer.client.xml.*");
 
 		classSourceFileComposerFactory.addImport(TextNodeImpl.class.getName());
 	}

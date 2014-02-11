@@ -100,12 +100,12 @@ public class SerializedObjects {
 						"[\"asd\", \"cfr\"]," +
 						"['emptyValue', null]," +
 						"[null, 'emptyKey']," +
-						"[{ \"index\" : 1, \"@class\" : \"li.tau.serializer.test.SerializedObjects$WithMaps\"}, { \"index\" : 2, \"@class\" : \"li.tau.serializer.test.SerializedObjects$WithMaps\"}]," +
+						"[{ \"index\" : 1, \"@class\" : \"li.tau.tserializer.test.SerializedObjects$WithMaps\"}, { \"index\" : 2, \"@class\" : \"li.tau.tserializer.test.SerializedObjects$WithMaps\"}]," +
 						"[{'#array':[1,2],'@class':'int-array'}, {'#array':[3.0, 4.0],'@class':'double-array'}]," +
-						"[{\"#array\" : [ { \"@class\" : \"int\", \"#value\" : 1}, { \"@class\" : \"int\", \"#value\" : 2}], \"@class\" : \"object-array\"}, { \"#array\" : [ { \"index\" : 3, \"@class\" : \"li.tau.serializer.test.SerializedObjects$WithMaps\"}], \"@class\" : \"object-array\"}]]," +
+						"[{\"#array\" : [ { \"@class\" : \"int\", \"#value\" : 1}, { \"@class\" : \"int\", \"#value\" : 2}], \"@class\" : \"object-array\"}, { \"#array\" : [ { \"index\" : 3, \"@class\" : \"li.tau.tserializer.test.SerializedObjects$WithMaps\"}], \"@class\" : \"object-array\"}]]," +
 						" \"@class\" : \"linked-hash-map\"}," +
 					" \"emptyMap\" : { }," +
-					" \"@class\" : \"li.tau.serializer.test.SerializedObjects$WithMaps\"}";
+					" \"@class\" : \"li.tau.tserializer.test.SerializedObjects$WithMaps\"}";
 		}
 		
 	}

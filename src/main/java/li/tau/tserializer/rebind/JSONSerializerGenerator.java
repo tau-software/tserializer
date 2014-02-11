@@ -27,7 +27,7 @@ public class JSONSerializerGenerator extends SerializerGenerator {
 	protected void addImports(ClassSourceFileComposerFactory classSourceFileComposerFactory) {
 		super.addImports(classSourceFileComposerFactory);
 		classSourceFileComposerFactory.addImport("com.google.gwt.json.client.*");
-		classSourceFileComposerFactory.addImport("li.tau.serializer.client.json.*");
+		classSourceFileComposerFactory.addImport("li.tau.tserializer.client.json.*");
 	}
 	
 	@Override
