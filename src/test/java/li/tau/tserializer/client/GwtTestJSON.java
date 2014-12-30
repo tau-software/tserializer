@@ -2,11 +2,13 @@ package li.tau.tserializer.client;
 
 import li.tau.tserializer.client.json.JSONSerializerImpl;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
 
+@Ignore
 public class GwtTestJSON extends GWTTestCase {
 	
 	TSerializer serializer;

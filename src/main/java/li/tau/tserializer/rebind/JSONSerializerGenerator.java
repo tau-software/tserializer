@@ -319,7 +319,7 @@ public class JSONSerializerGenerator extends SerializerGenerator {
 		if (type.isArray() != null) {
 			return getArrayClassName(type.isArray().getComponentType()) + "-array";
 		} else {
-			return type.isPrimitive().getSimpleSourceName();
+			return type.getSimpleSourceName();
 		}
 	}
 

@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import li.tau.tserializer.client.json.JSONDeserializator.JSONObjectDeserializator;
 
@@ -86,10 +87,20 @@ public class JSONSerializerImpl implements JSONSerializer {
 	}
 
 	protected Object fromJSON(JSONObject object) {
-		if (object == null) return null;
-		JSONValue classValue = object.get("@class");
-		if (classValue == null) throw new IllegalArgumentException("Couldn't find class name in JSONObject: " + object.toString()); 
-		return fromJSON(object, classValue.isString().stringValue());
+		if (object == null) {
+			return null;
+		}
+		Set<String> keys = object.keySet();
+		if (keys.isEmpty()) {
+			throw new IllegalArgumentException("Couldn't find class name in JSONObject: " + object.toString());
+		}
+		if (keys.size() > 1) {
+			throw new IllegalArgumentException("Ambiguous class names in JSONObject: " + object.toString());
+		}
+//		JSONValue classValue = object.get("@class");
+//		if (classValue == null) throw new IllegalArgumentException("Couldn't find class name in JSONObject: " + object.toString());
+		String className = keys.iterator().next();
+		return fromJSON(object.get(className), className);
 	}
 	
 	@Override

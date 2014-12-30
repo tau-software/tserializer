@@ -221,7 +221,7 @@ public abstract class SerializerGenerator extends Generator {
 	protected void fieldNotSupported(JClassType classType, JField field, SourceWriter sw, TreeLogger logger, Type type) {
 		String reason = getReason(field);
 		if (reason != null) {
-			logger.log(type, field.getName() + "@" + classType.getParameterizedQualifiedSourceName() + " won't be deserialized. Reason: " + getReason(field) + ".");
+			logger.log(type, field.getName() + "@" + classType.getParameterizedQualifiedSourceName() + " won't be deserialized. Reason: " + reason + ".");
 		}
 	}
 	
@@ -296,13 +296,29 @@ public abstract class SerializerGenerator extends Generator {
 	}
 
 	protected boolean isDeserializable(JField field) {
-		return field.isPublic()
+		return isWriteAccessible(field)
 				&& field.isFinal() == false
 				&& field.isStatic() == false
 				&& field.isTransient() == false
 				&& (field.isAnnotationPresent(TSerializerOmitField.class) == false ||
 						(field.getAnnotation(TSerializerOmitField.class).value() != Mode.DESERIALIZATION &&
 						field.getAnnotation(TSerializerOmitField.class).value() != Mode.BOTH));
+	}
+	
+	static boolean isWriteAccessible(JField field) {
+		return field.isPublic() || hasSetter(field);
+	}
+	
+	static boolean hasSetter(JField field) {
+		return field.getEnclosingType().findMethod(getSetterName(field), new JType[]{field.getType()}) != null;
+	}
+	
+	static String getGetterName(JField field) {
+		return "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+	}
+
+	static String getSetterName(JField field) {
+		return "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
 	}
 
 	protected String getFieldNameForSerialization(JField field) {

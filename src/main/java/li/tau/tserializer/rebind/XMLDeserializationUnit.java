@@ -1,5 +1,7 @@
 package li.tau.tserializer.rebind;
 
+import static li.tau.tserializer.rebind.SerializerGenerator.getSetterName;
+import static li.tau.tserializer.rebind.SerializerGenerator.hasSetter;
 import li.tau.tserializer.client.annotation.Mode;
 import li.tau.tserializer.client.annotation.TSerializerAlias;
 
@@ -30,43 +32,43 @@ public class XMLDeserializationUnit {
 
 	void writeStringDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = getTextNodeValue(node);");
+		writeAssignExpression(field, sw, "getTextNodeValue(node)");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
 	public void writeBooleanDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = Boolean.parseBoolean(getTextNodeValue(node));");
+		writeAssignExpression(field, sw, "Boolean.parseBoolean(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
 	public void writeCharacterDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = getTextNodeValue(node).charAt(0);");
+		writeAssignExpression(field, sw, "getTextNodeValue(node).charAt(0)");
 		writeSetterSuffix(classType, field, sw);
 	}
 
 	public void writeDoubleDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = parseDouble(getTextNodeValue(node));");
+		writeAssignExpression(field, sw, "parseDouble(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
 	public void writeFloatDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = Float.parseFloat(getTextNodeValue(node));");
+		writeAssignExpression(field, sw, "Float.parseFloat(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
 	public void writeLongDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = Long.parseLong(getTextNodeValue(node));");
+		writeAssignExpression(field, sw, "Long.parseLong(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
 	public void writeIntegerDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = Integer.parseInt(getTextNodeValue(node));");
+		writeAssignExpression(field, sw, "Integer.parseInt(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
 	}
 
@@ -78,26 +80,28 @@ public class XMLDeserializationUnit {
 
 	public void writeDeserializableDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = (" + field.getType().getQualifiedSourceName()
-				+ ")fromXML(node, \"" + XMLSerializerGenerator.getServerClassName(field.getType()) + "\");");
+		writeAssignExpression(field, sw, "(" + field.getType().getQualifiedSourceName()
+				+ ")fromXML(node, \"" + XMLSerializerGenerator.getServerClassName(field.getType()) + "\")");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
 	void writeDeserializableArrayListDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = new " + java.util.ArrayList.class.getName() + "<" + field.getType().isParameterized().getTypeArgs()[0].getParameterizedQualifiedSourceName() + ">();");
+		String arrayType = java.util.ArrayList.class.getName() + "<" + field.getType().isParameterized().getTypeArgs()[0].getParameterizedQualifiedSourceName() + ">";
+		sw.println(arrayType + " array = new " + arrayType + "();");
 		sw.println("NodeList nodeList = node.getChildNodes();");
 		sw.println("for (int i = 0; i < nodeList.getLength(); ++i) {");
 			sw.indent();
 			sw.println("if (nodeList.item(i).getNodeType() == Node.ELEMENT_NODE) {");
 				sw.indent();
-				sw.println("instance." + field.getName() + ".add((" 
+				sw.println("array.add((" 
 							+ field.getType().isParameterized().getTypeArgs()[0].getQualifiedSourceName()
 							+ ")fromXML(nodeList.item(i), nodeList.item(i).getNodeName()));");
 				sw.outdent();
 			sw.println("}");
 			sw.outdent();
 		sw.println("}");
+		writeAssignExpression(field, sw, "array");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
@@ -122,19 +126,19 @@ public class XMLDeserializationUnit {
 	
 	void writePrimitiveDoubleArrayDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = (double[])fromXML(node, \"double-array\");");
+		writeAssignExpression(field, sw, "(double[])fromXML(node, \"double-array\")");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
 	void writePrimitiveIntegerArrayDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = (int[])fromXML(node, \"int-array\");");
+		writeAssignExpression(field, sw, "(int[])fromXML(node, \"int-array\")");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
 	void writeDateArrayDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = (Date[])fromXML(node, \"date-array\");");
+		writeAssignExpression(field, sw, "(Date[])fromXML(node, \"date-array\")");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
@@ -146,7 +150,7 @@ public class XMLDeserializationUnit {
 		writeSetterPrefix(classType, field, sw);
 		sw.println("if (node.hasAttributes() && node.getAttributes().getNamedItem(\"class\") != null && deserializators.containsKey(node.getAttributes().getNamedItem(\"class\").getNodeValue())) {");
 			sw.indent();
-			sw.println("instance." + field.getName() + " = (" + componentClassName + "[]) fromXML(node, node.getAttributes().getNamedItem(\"class\").getNodeValue());");
+			writeAssignExpression(field, sw, "(" + componentClassName + "[]) fromXML(node, node.getAttributes().getNamedItem(\"class\").getNodeValue())");
 			sw.println("return;");
 			sw.outdent();
 		sw.println("}");
@@ -160,8 +164,7 @@ public class XMLDeserializationUnit {
 				sw.println("tempList.add((" + componentClassName + ")fromXML(nodeList.item(i), nodeList.item(i).getNodeName()));");
 				sw.outdent();
 			sw.println("}");
-			sw.println("instance." + field.getName() + " = new " + componentClassName + "[tempList.size()];");
-			sw.println("tempList.toArray(instance." + field.getName() +");");
+			writeAssignExpression(field, sw, "tempList.toArray(new " + componentClassName + "[tempList.size()])");
 			sw.outdent();
 		sw.println("}");
 		writeSetterSuffix(classType, field, sw);
@@ -225,6 +228,14 @@ public class XMLDeserializationUnit {
 //		// TODO Auto-generated method stub
 //		
 //	}
+	
+	private void writeAssignExpression(JField field, SourceWriter sw, String expression) {
+		if (hasSetter(field)) {
+			sw.println("instance." + getSetterName(field) + "(" + expression + ");");
+		} else {
+			sw.println("instance." + field.getName() + " = " + expression + ";");
+		}
+	}
 
 	public void writeParameterizedDeserializableDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);

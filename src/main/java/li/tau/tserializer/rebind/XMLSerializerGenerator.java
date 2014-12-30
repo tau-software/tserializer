@@ -92,7 +92,7 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 				
 				for (JField field : classType.getFields()) {
 					JType fieldType = field.getType();
-					if (field.isPublic()
+					if (isWriteAccessible(field)
 						&& field.isFinal() == false
 						&& field.isStatic() == false
 						&& field.isTransient() == false
@@ -247,6 +247,7 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 		sw.println();
 	}
 	
+	@Override
 	protected void writeEnumDeserializator(JEnumType enumType) {
 		sw.println("deserializator = new EnumDeserializator<" + enumType.getQualifiedSourceName() + ">() {");
 			sw.indent();

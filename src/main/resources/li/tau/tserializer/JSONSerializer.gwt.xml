@@ -3,7 +3,9 @@
 <module>
 
 	<inherits name='com.google.gwt.user.User' />
+	<inherits name='com.google.gwt.xml.XML' />
 	<inherits name='com.google.gwt.json.JSON' />
+	<inherits name='com.google.gwt.junit.JUnit' />
 	
 	<generate-with class="li.tau.tserializer.rebind.JSONSerializerGenerator">
 		<when-type-assignable class="li.tau.tserializer.client.TSerializer" />

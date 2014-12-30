@@ -1,5 +1,7 @@
 package li.tau.tserializer.rebind;
 
+import static li.tau.tserializer.rebind.SerializerGenerator.getSetterName;
+import static li.tau.tserializer.rebind.SerializerGenerator.hasSetter;
 import li.tau.tserializer.client.annotation.Mode;
 import li.tau.tserializer.client.annotation.TSerializerAlias;
 
@@ -42,21 +44,21 @@ public class JSONClassDeserializationUnit {
 	public class DeserializableUnit extends JSONFieldDeserializationUnit {
 		@Override
 		protected void writeBody(JField field) {
-			sw.println(String.format("instance.%1$s = (%2$s)fromJSON(json, \"%3$s\");", field.getName(), field.getType().getQualifiedSourceName(), field.getType().getQualifiedBinaryName()));
+			writeAssignExpression(field, sw, String.format("(%1$s)fromJSON(json, \"%2$s\")", field.getType().getQualifiedSourceName(), field.getType().getQualifiedBinaryName()));
 		}
 	}
 	
 	public class StringUnit extends JSONFieldDeserializationUnit {
 		@Override
 		protected void writeBody(JField field) {
-			sw.println("instance." + field.getName() + " = getString(json);");
+			writeAssignExpression(field, sw, "getString(json)");
 		}
 	}
 	
 	public class BooleanUnit extends JSONFieldDeserializationUnit {
 		@Override
 		protected void writeBody(JField field) {
-			sw.println("instance." + field.getName() + " = getBoolean(json);");
+			writeAssignExpression(field, sw, "getBoolean(json)");
 		}
 	}
 	
@@ -74,6 +76,7 @@ public class JSONClassDeserializationUnit {
 			this.methodPrefix = methodPrefix;
 		}
 		
+		@Override
 		protected void writeBody(JField field) {
 			sw.println("instance." + field.getName() + " = getNumber(json)." + methodPrefix + "Value();");
 		};
@@ -100,8 +103,9 @@ public class JSONClassDeserializationUnit {
 
 	public class ArrayUnit extends JSONFieldDeserializationUnit {
 
+		@Override
 		protected void writeBody(JField field) {
-			sw.println(String.format("instance.%1$s = (%2$s)fromJSON(json, \"%3$s\");", field.getName(), field.getType().getQualifiedSourceName(), JSONSerializerGenerator.getArrayClassName(field.getType())));
+			writeAssignExpression(field, sw, String.format("(%1$s)fromJSON(json, \"%2$s\")", field.getType().getQualifiedSourceName(), JSONSerializerGenerator.getArrayClassName(field.getType())));
 //			sw.println("if (json.isObject() != null && json.isObject().get(\"@class\").isString().stringValue() != null && deserializators.containsKey(json.isObject().get(\"@class\").isString().stringValue())) {");
 //				sw.indent();
 //				sw.println("instance." + field.getName() + " = (" + componentTypeName + "[]) fromJSON(json, json.isObject().get(\"@class\").isString().stringValue());");
@@ -140,6 +144,7 @@ public class JSONClassDeserializationUnit {
 			}
 		}
 
+		@Override
 		protected void writeBody(JField field) {
 			sw.println("if (json.isObject() != null && json.isObject().get(\"@class\").isString().stringValue() != null && deserializators.containsKey(json.isObject().get(\"@class\").isString().stringValue())) {");
 				sw.indent();
@@ -330,6 +335,14 @@ public class JSONClassDeserializationUnit {
 	public JSONClassDeserializationUnit(JClassType classType, SourceWriter sw) {
 		this.classType = classType;
 		this.sw = sw;
+	}
+	
+	private static void writeAssignExpression(JField field, SourceWriter sw, String expression) {
+		if (hasSetter(field)) {
+			sw.println("instance." + getSetterName(field) + "(" + expression + ");");
+		} else {
+			sw.println("instance." + field.getName() + " = " + expression + ";");
+		}
 	}
 	
 }
