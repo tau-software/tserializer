@@ -74,7 +74,7 @@ public class XMLDeserializationUnit {
 
 	public void writeEnumDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = " + field.getType().getQualifiedSourceName() + ".valueOf(getTextNodeValue(node));");
+		writeAssignExpression(field, sw, field.getType().getQualifiedSourceName() + ".valueOf(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
 	}
 
@@ -206,7 +206,7 @@ public class XMLDeserializationUnit {
 		writeSetterPrefix(classType, field, sw);
 		sw.println("if (instance." + field.getName() + " == null) {");
 			sw.indent();
-			sw.println("instance." + field.getName() + " = new " + java.util.ArrayList.class.getName() + "<" + field.getType().isParameterized().getTypeArgs()[0].getQualifiedSourceName() + ">();");
+			writeAssignExpression(field, sw, "new " + java.util.ArrayList.class.getName() + "<" + field.getType().isParameterized().getTypeArgs()[0].getQualifiedSourceName() + ">()");
 			sw.outdent();
 		sw.println("}");
 		sw.println("instance." + field.getName() + ".add(getTextNodeValue(node));");
@@ -217,7 +217,7 @@ public class XMLDeserializationUnit {
 		writeSetterPrefix(classType, field, sw);
 		sw.println("if (instance." + field.getName() + " == null) {");
 			sw.indent();
-			sw.println("instance." + field.getName() + " = new " + java.util.ArrayList.class.getName() + "();");
+			writeAssignExpression(field, sw, "new " + java.util.ArrayList.class.getName() + "()");
 			sw.outdent();
 		sw.println("}");
 		sw.println("instance." + field.getName() + ".add(fromXML(node, node.getNodeName()));");
@@ -247,16 +247,16 @@ public class XMLDeserializationUnit {
 				sw.println("throw new RuntimeException(\"Need more information about type of this field: " + field.getName() + " in class " + classType.getQualifiedSourceName() + "\");");
 				sw.outdent();
 			sw.println("}");
-			sw.println("instance." + field.getName() + " = (" + castClassName + ") fromXML(node, node.getAttributes().getNamedItem(\"class\").getNodeValue());");
+			writeAssignExpression(field, sw, "(" + castClassName + ") fromXML(node, node.getAttributes().getNamedItem(\"class\").getNodeValue())");
 		} else if (field.getType().isParameterized() != null) {
 			castClassName = field.getType().isParameterized().getBaseType().getQualifiedSourceName();
 			sw.println("if (node.hasAttributes() && node.getAttributes().getNamedItem(\"class\") != null) {");
 				sw.indent();
-				sw.println("instance." + field.getName() + " = (" + castClassName + ") fromXML(node, node.getAttributes().getNamedItem(\"class\").getNodeValue());");
+				writeAssignExpression(field, sw, "(" + castClassName + ") fromXML(node, node.getAttributes().getNamedItem(\"class\").getNodeValue())");
 				sw.outdent();
 			sw.println("} else {");
 				sw.indent();
-				sw.println("instance." + field.getName() + " = (" + castClassName + ") fromXML(node, \"" + castClassName + "\");");
+				writeAssignExpression(field, sw, "(" + castClassName + ") fromXML(node, \"" + castClassName + "\")");
 				sw.outdent();
 			sw.println("}");
 		}

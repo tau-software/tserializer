@@ -307,56 +307,56 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 						if (fieldType.isPrimitive() != null
 							|| SerializationUtils.PRIMITIVE_WRAPPERS_SET.contains(fieldType.getQualifiedSourceName())) {
 							if (isFieldAsAttributeForSerialization(field)) {
-								sw.println("appendPrimitiveWrapperAttributeNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", instance." + field.getName() + ");");
+								sw.println("appendPrimitiveWrapperAttributeNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", " + getReadExpression(field) + ");");
 							} else if (isFieldImplicit(field)){
-								sw.println("appendPrimitiveWrapperNodeToElement(classNode, instance." + field.getName() + ");");
+								sw.println("appendPrimitiveWrapperNodeToElement(classNode, " + getReadExpression(field) + ");");
 							} else {
-								sw.println("appendPrimitiveWrapperNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", instance." + field.getName() + ");");
+								sw.println("appendPrimitiveWrapperNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", " + getReadExpression(field) + ");");
 							}
 						} else if (fieldType.isEnum() != null) { 
 							if (isFieldAsAttributeForSerialization(field)) {
-								sw.println("appendPrimitiveWrapperAttributeNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", getEnumValue(instance." + field.getName() + "));");
+								sw.println("appendPrimitiveWrapperAttributeNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", getEnumValue(" + getReadExpression(field) + "));");
 							} else if (isFieldImplicit(field)){
-								sw.println("appendPrimitiveWrapperNodeToElement(classNode, getEnumValue(instance." + field.getName() + "));");
+								sw.println("appendPrimitiveWrapperNodeToElement(classNode, getEnumValue(" + getReadExpression(field) + "));");
 							} else {
-								sw.println("appendPrimitiveWrapperNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", getEnumValue(instance." + field.getName() + "));");
+								sw.println("appendPrimitiveWrapperNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", getEnumValue(" + getReadExpression(field) + "));");
 							}
 						} else {
 							if (fieldType.isArray() != null && fieldType.isArray().getComponentType().getQualifiedSourceName().equals(Integer.TYPE.getName())) {
-								sw.println("appendPrimitiveIntegerArrayNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", instance." + field.getName() + ");");
+								sw.println("appendPrimitiveIntegerArrayNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", " + getReadExpression(field) + ");");
 							} else if (	fieldType.isClassOrInterface() != null &&
 										fieldType.isClassOrInterface().isAssignableTo(typeOracle.findType(TSerializable.class.getName()))) {
-								sw.println("appendSerializableNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", \"" + getGWTClassName(fieldType) + "\", instance." + field.getName() + ");");
+								sw.println("appendSerializableNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", \"" + getGWTClassName(fieldType) + "\", " + getReadExpression(field) + ");");
 	//									sw.println("Element " + field.getName() + "Element = DOCUMENT.createElement(\"" + getFieldName(field) + "\");");
 	//									if (fieldType.isTypeParameter() != null) {
-	//										sw.println(field.getName() + "Element.setAttribute(\"class\", getClassName(instance." + field.getName() + "));");
+	//										sw.println(field.getName() + "Element.setAttribute(\"class\", getClassName(" + getReadExpression(field) + "));");
 	//									}
-	//									sw.println("classNode.appendChild(toXML(instance." + field.getName() + ", " + field.getName() + "Element, instance." + field.getName() + ".getClass().getName()));");
+	//									sw.println("classNode.appendChild(toXML(" + getReadExpression(field) + ", " + field.getName() + "Element, " + getReadExpression(field) + ".getClass().getName()));");
 							} else if (	fieldType.isClassOrInterface() != null &&
 										fieldType.isClassOrInterface().isAssignableTo(typeOracle.findType(Collection.class.getName())) &&
 										!fieldType.isClassOrInterface().isAssignableTo(typeOracle.findType(EnumSet.class.getName()))) {
-								sw.println("if (instance." + field.getName() + " != null) {");
+								sw.println("if (" + getReadExpression(field) + " != null) {");
 									sw.indent();
 	
 								if (isFieldImplicitCollection(field)) {
-									sw.println("for (int i = 0; i < instance." + field.getName() + ".toArray().length; ++i) {");
+									sw.println("for (int i = 0; i < " + getReadExpression(field) + ".toArray().length; ++i) {");
 										sw.indent();
 										if (field.getAnnotation(TSerializerImplicitCollection.class).itemFieldName() != null && !field.getAnnotation(TSerializerImplicitCollection.class).itemFieldName().isEmpty()) {
-											sw.println("classNode.appendChild(toXML((" + XMLSerializerGenerator.SERIALIZABLE_TYPE.getName() + ")instance." + field.getName() + ".toArray()[i], DOCUMENT.createElement(\"" + field.getAnnotation(TSerializerImplicitCollection.class).itemFieldName() + "\"), instance." + field.getName() + ".toArray()[i].getClass().getName()));");
+											sw.println("classNode.appendChild(toXML((" + XMLSerializerGenerator.SERIALIZABLE_TYPE.getName() + ")" + getReadExpression(field) + ".toArray()[i], DOCUMENT.createElement(\"" + field.getAnnotation(TSerializerImplicitCollection.class).itemFieldName() + "\"), " + getReadExpression(field) + ".toArray()[i].getClass().getName()));");
 										} else {
-											sw.println("classNode.appendChild(toXML((" + XMLSerializerGenerator.SERIALIZABLE_TYPE.getName() + ")instance." + field.getName() + ".toArray()[i], createClassNode(instance." + field.getName() + ".toArray()[i]), instance." + field.getName() + ".toArray()[i].getClass().getName()));");
+											sw.println("classNode.appendChild(toXML((" + XMLSerializerGenerator.SERIALIZABLE_TYPE.getName() + ")" + getReadExpression(field) + ".toArray()[i], createClassNode(" + getReadExpression(field) + ".toArray()[i]), " + getReadExpression(field) + ".toArray()[i].getClass().getName()));");
 										}
 										sw.outdent();
 									sw.println("}");
 								} else {
-									sw.println("appendArrayNodeToElement(classNode, \"" + field.getName() + "\",  instance." + field.getName() + ".toArray());");
+									sw.println("appendArrayNodeToElement(classNode, \"" + field.getName() + "\",  " + getReadExpression(field) + ".toArray());");
 								}
 									sw.outdent();
 								sw.println("}");
 							} else if (fieldType.isArray() != null) {
-								sw.println("appendArrayNodeToElement(classNode, \"" + field.getName() + "\",  instance." + field.getName() + ");");
+								sw.println("appendArrayNodeToElement(classNode, \"" + field.getName() + "\",  " + getReadExpression(field) + ");");
 							} else if (fieldType.isClassOrInterface() != null) {
-								sw.println("appendNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", \"" + getGWTClassName(fieldType) + "\", instance." + field.getName() + ");");
+								sw.println("appendNodeToElement(classNode, \"" + getFieldNameForSerialization(field) + "\", \"" + getGWTClassName(fieldType) + "\", " + getReadExpression(field) + ");");
 							} else {
 								logUnserializableField(classType, field);
 							}
@@ -398,6 +398,14 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 			return classType.isClassOrInterface().getEnclosingType().getQualifiedSourceName() + "_-" + classType.getSimpleSourceName();
 		} else {
 			return classType.getQualifiedSourceName();
+		}
+	}
+	
+	private String getReadExpression(JField field) {
+		if (hasGetter(field)) {
+			return "instance." + getGetterName(field) + "()";
+		} else {
+			return "instance." + field.getName();
 		}
 	}
 	

@@ -1,5 +1,7 @@
 package li.tau.tserializer.rebind;
 
+import static com.google.gwt.core.ext.TreeLogger.ERROR;
+
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -232,7 +234,9 @@ public abstract class SerializerGenerator extends Generator {
 		if (field.isStatic()) return null;
 		
 		
-		if (field.isPrivate()) return "is private";
+		if (field.isPrivate()) {
+			return "is private, has setter = " + hasSetter(field);
+		}
 		if (field.isProtected()) return "is protected";
 		if (field.isFinal()) return "is final";
 		if (field.isAnnotationPresent(TSerializerOmitField.class) &&
@@ -277,18 +281,13 @@ public abstract class SerializerGenerator extends Generator {
 	}
 	
 	protected void logUnserializableField(JClassType classType, JField field) {
-		if (isSerializable(field)) {
-			logger.log(TreeLogger.ERROR, "This field will be not serialized: " + field.getName() + "@" + classType.getParameterizedQualifiedSourceName());
-			logger.log(TreeLogger.ERROR, "isClass: " + (field.getType().isClass() != null));
-			logger.log(TreeLogger.ERROR, "isInterface: " + (field.getType().isInterface() != null));
-			logger.log(TreeLogger.ERROR, "isTypeParameter: " + (field.getType().isTypeParameter() != null));
-		}
+		logger.log(ERROR, field.getName() + "@" + classType.getParameterizedQualifiedSourceName() + " won't be serialized");
 	}
 	
 	protected boolean isSerializable(JField field) {
 		return 
-			field.isPublic() &&
-			field.isStatic() == false &&
+			isReadAccessible(field)
+			&& field.isStatic() == false &&
 			field.isTransient() == false &&
 			(field.isAnnotationPresent(TSerializerOmitField.class) == false ||
 					(field.getAnnotation(TSerializerOmitField.class).value() != Mode.SERIALIZATION &&
@@ -305,16 +304,28 @@ public abstract class SerializerGenerator extends Generator {
 						field.getAnnotation(TSerializerOmitField.class).value() != Mode.BOTH));
 	}
 	
+	static boolean isReadAccessible(JField field) {
+		return field.isPublic() || hasGetter(field);
+	}
+
 	static boolean isWriteAccessible(JField field) {
 		return field.isPublic() || hasSetter(field);
 	}
 	
+	static boolean hasGetter(JField field) {
+		return field.getEnclosingType().findMethod(getGetterName(field), new JType[0]) != null;
+	}
+
 	static boolean hasSetter(JField field) {
 		return field.getEnclosingType().findMethod(getSetterName(field), new JType[]{field.getType()}) != null;
 	}
 	
 	static String getGetterName(JField field) {
-		return "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+		String getName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+		if (field.getEnclosingType().findMethod(getName, new JType[0]) != null) {
+			return getName;
+		}
+		return "is" + getName.substring(3);
 	}
 
 	static String getSetterName(JField field) {
