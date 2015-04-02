@@ -177,6 +177,8 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 									deserializationUnit.writeStringDeserializator(classType, field, sw);
 								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.lang.Boolean.class.getName()))) {
 									deserializationUnit.writeBooleanDeserializator(classType, field, sw);
+								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.lang.Byte.class.getName()))) {
+									deserializationUnit.writeByteDeserializator(classType, field, sw);
 								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.lang.Character.class.getName()))) {
 									deserializationUnit.writeCharacterDeserializator(classType, field, sw);
 								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.util.Date.class.getName()))) {
@@ -187,6 +189,8 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 									deserializationUnit.writeFloatDeserializator(classType, field, sw);
 								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.lang.Long.class.getName()))) {
 									deserializationUnit.writeLongDeserializator(classType, field, sw);
+								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.lang.Short.class.getName()))) {
+									deserializationUnit.writeShortDeserializator(classType, field, sw);
 								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.lang.Integer.class.getName()))) {
 									deserializationUnit.writeIntegerDeserializator(classType, field, sw);
 								} else if (fieldClass.isAssignableTo(deserializableType)) {
@@ -198,12 +202,16 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 						} else if (fieldType.isPrimitive() != null) {
 							if (JPrimitiveType.BOOLEAN.equals(fieldType.isPrimitive())) {
 								deserializationUnit.writeBooleanDeserializator(classType, field, sw);
+							} else if (JPrimitiveType.BYTE.equals(fieldType.isPrimitive())) {
+								deserializationUnit.writeByteDeserializator(classType, field, sw);
 							} else if (JPrimitiveType.DOUBLE.equals(fieldType.isPrimitive())) {
 								deserializationUnit.writeDoubleDeserializator(classType, field, sw);
 							} else if (JPrimitiveType.INT.equals(fieldType.isPrimitive())) {
 								deserializationUnit.writeIntegerDeserializator(classType, field, sw);
 							} else if (JPrimitiveType.LONG.equals(fieldType.isPrimitive())) {
 								deserializationUnit.writeLongDeserializator(classType, field, sw);
+							} else if (JPrimitiveType.SHORT.equals(fieldType.isPrimitive())) {
+								deserializationUnit.writeShortDeserializator(classType, field, sw);
 							} else if (JPrimitiveType.FLOAT.equals(fieldType.isPrimitive())) {
 								deserializationUnit.writeFloatDeserializator(classType, field, sw);
 							} else {

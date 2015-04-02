@@ -42,6 +42,12 @@ public class XMLDeserializationUnit {
 		writeSetterSuffix(classType, field, sw);
 	}
 	
+	public void writeByteDeserializator(JClassType classType, JField field,	SourceWriter sw) {
+		writeSetterPrefix(classType, field, sw);
+		writeAssignExpression(field, sw, "Byte.parseByte(getTextNodeValue(node))");
+		writeSetterSuffix(classType, field, sw);
+	}
+	
 	public void writeCharacterDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
 		writeAssignExpression(field, sw, "getTextNodeValue(node).charAt(0)");
@@ -63,6 +69,12 @@ public class XMLDeserializationUnit {
 	public void writeLongDeserializator(JClassType classType, JField field,	SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
 		writeAssignExpression(field, sw, "Long.parseLong(getTextNodeValue(node))");
+		writeSetterSuffix(classType, field, sw);
+	}
+	
+	public void writeShortDeserializator(JClassType classType, JField field, SourceWriter sw) {
+		writeSetterPrefix(classType, field, sw);
+		writeAssignExpression(field, sw, "Short.parseShort(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
