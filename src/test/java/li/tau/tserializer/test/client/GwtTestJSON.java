@@ -1,5 +1,6 @@
-package li.tau.tserializer.client;
+package li.tau.tserializer.test.client;
 
+import li.tau.tserializer.client.TSerializer;
 import li.tau.tserializer.client.json.JSONSerializerImpl;
 
 import org.junit.Ignore;

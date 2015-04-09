@@ -1,4 +1,4 @@
-package li.tau.tserializer.client;
+package li.tau.tserializer.test.client;
 
 import java.util.Date;
 
