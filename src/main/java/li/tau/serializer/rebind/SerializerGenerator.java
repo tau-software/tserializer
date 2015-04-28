@@ -1,0 +1,326 @@
+package li.tau.serializer.rebind;
+
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import li.tau.serializer.client.Serializer;
+import li.tau.serializer.client.annotation.Mode;
+import li.tau.serializer.client.annotation.TDeserializable;
+import li.tau.serializer.client.annotation.TSerializable;
+import li.tau.serializer.client.annotation.TSerializerAlias;
+import li.tau.serializer.client.annotation.TSerializerAsAttribute;
+import li.tau.serializer.client.annotation.TSerializerImplicit;
+import li.tau.serializer.client.annotation.TSerializerImplicitCollection;
+import li.tau.serializer.client.annotation.TSerializerOmitField;
+
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.TreeLogger.Type;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JEnumType;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
+import com.google.gwt.user.rebind.SourceWriter;
+
+public abstract class SerializerGenerator extends Generator {
+	
+	public static final Class<?> SERIALIZABLE_TYPE = TSerializable.class;
+	public static final Class<?> DESERIALIZABLE_TYPE = TDeserializable.class;
+
+	protected TreeLogger logger;
+	protected TypeOracle typeOracle;
+	protected SourceWriter sw;
+	
+	public static JClassType serializableType;
+	public static JClassType deserializableType;
+
+	@Override
+	public final String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
+		this.logger = logger;
+		typeOracle = context.getTypeOracle();
+		
+		try {
+			serializableType = typeOracle.getType(SERIALIZABLE_TYPE.getName());
+			deserializableType = typeOracle.getType(DESERIALIZABLE_TYPE.getName());
+		} catch (NotFoundException e) {
+			logger.log(Type.ERROR, e.getLocalizedMessage());
+			throw new UnableToCompleteException();
+		}
+
+		JClassType classType = typeOracle.findType(typeName);
+		if (classType == null || !classType.getQualifiedSourceName().equals(Serializer.class.getName())) {
+			throw new UnableToCompleteException();
+		}
+
+		String packageName = classType.getPackage().getName();
+		String simpleName = classType.getSimpleSourceName() + "Rebind";
+
+		ClassSourceFileComposerFactory classSourceFileComposerFactory = new ClassSourceFileComposerFactory(packageName, simpleName);
+		addImports(classSourceFileComposerFactory);
+		classSourceFileComposerFactory.setSuperclass(getSuperClassSerializer().getName());
+		
+		PrintWriter pw;
+		if ((pw = context.tryCreate(logger, packageName, simpleName)) == null) {
+			return packageName + "." + simpleName;
+		}
+
+		sw = classSourceFileComposerFactory.createSourceWriter(context, pw);
+
+		sw.println("public " + simpleName + "() {");
+			sw.indent();
+			sw.println("super();");
+			sw.println();
+			writeClassesDeserializators();
+			sw.println();
+			writeClassesSerializators();
+			writeClassNamesMap();
+			sw.outdent();
+		sw.println("}");
+		sw.println();
+
+		sw.commit(logger);
+
+		return packageName + "." + simpleName;
+	}
+	
+	protected void addImports(ClassSourceFileComposerFactory classSourceFileComposerFactory) {
+		classSourceFileComposerFactory.addImport(java.util.ArrayList.class.getName());
+		classSourceFileComposerFactory.addImport(java.util.Date.class.getName());
+		classSourceFileComposerFactory.addImport(java.util.HashMap.class.getName());
+
+		classSourceFileComposerFactory.addImport(com.google.gwt.core.client.GWT.class.getName());
+		classSourceFileComposerFactory.addImport(com.google.gwt.i18n.client.DateTimeFormat.class.getName());
+
+		classSourceFileComposerFactory.addImport(Mode.class.getName());
+		
+		classSourceFileComposerFactory.addImport(DESERIALIZABLE_TYPE.getName());
+		classSourceFileComposerFactory.addImport(SERIALIZABLE_TYPE.getName());
+	}
+	
+	protected abstract Class<? extends Serializer> getSuperClassSerializer();
+	
+	protected Set<JEnumType> enumTypeSet = new HashSet<JEnumType>();
+	
+	protected void writeClassesDeserializators() {
+		HashSet<String> deserializableClasses = new HashSet<String>();
+		for (JClassType classType : typeOracle.getTypes()) {
+			if (classType.isAssignableTo(deserializableType)) {
+				while (classType.getSuperclass() != null &&
+					!classType.getQualifiedSourceName().startsWith("java.")) {
+					deserializableClasses.add(classType.getQualifiedSourceName());
+					classType = classType.getSuperclass();
+				}
+			}
+		}
+		while (deserializableClasses.isEmpty() == false) {
+			String[] classNames = deserializableClasses.toArray(new String[deserializableClasses.size()]);
+			for (String className : classNames) {
+				if (!deserializableClasses.contains(typeOracle.findType(className).getSuperclass().getQualifiedSourceName())) {
+					writeClassDeserializator(typeOracle.findType(className));
+					deserializableClasses.remove(className);
+				}
+			}
+		}
+		for (JEnumType enumType : enumTypeSet) {
+			writeEnumDeserializator(enumType);
+		}
+		enumTypeSet.clear();
+	}
+	
+	protected abstract void writeClassDeserializator(JClassType classType);
+	protected abstract void writeEnumDeserializator(JEnumType enumType);
+	
+	private void writeClassesSerializators() {
+		
+		HashSet<String> serializableClasses = new HashSet<String>();
+		
+		for (JClassType classType : typeOracle.getTypes()) {
+			if (classType.isAssignableTo(XMLSerializerGenerator.serializableType)) {
+				while (classType.getSuperclass() != null &&
+						!classType.getPackage().getName().startsWith("java.")) {
+					serializableClasses.add(classType.getQualifiedSourceName());
+					classType = classType.getSuperclass();
+				}
+			}
+		}
+
+		while (serializableClasses.isEmpty() == false) {
+			String[] classNames = serializableClasses.toArray(new String[serializableClasses.size()]);
+			for (String className : classNames) {
+				if (!serializableClasses.contains(typeOracle.findType(className).getSuperclass().getQualifiedSourceName())) {
+					writeClassSerializator(typeOracle.findType(className));
+					serializableClasses.remove(className);
+				}
+			}
+		}
+
+	}
+	
+	protected abstract void writeClassSerializator(JClassType classType);
+	
+	protected String getImplicitFieldName(JClassType classType) {
+		for (JField field : classType.getFields()) {
+			if (field.isAnnotationPresent(TSerializerImplicit.class)) {
+				return field.getName();
+			}
+		}
+		return null;
+	}
+	
+	protected boolean isAccessibleImplicitField(JClassType classType, Mode mode) {
+		for (JField field : classType.getFields()) {
+			if (field.isAnnotationPresent(TSerializerImplicit.class)) {
+				return field.getAnnotation(TSerializerImplicit.class).mode() == Mode.BOTH ||
+				field.getAnnotation(TSerializerImplicit.class).mode() == mode;
+			}
+		}
+		return false;
+	}
+	
+	protected String getImplicitCollectionWithoutItemNameFieldName(JClassType classType, Mode mode) {
+		for (JField field : classType.getFields()) {
+			TSerializerImplicitCollection annotation = field.getAnnotation(TSerializerImplicitCollection.class);
+			if (annotation != null && (annotation.mode() == Mode.BOTH || annotation.mode() == mode) && annotation.itemFieldName().isEmpty()) {
+				return field.getName();
+			}
+		}
+		return null;
+	}
+	
+	protected Map<String, String> getImplicitCollectionWithItemFieldNameMap(JClassType classType, Mode mode) {
+		Map<String, String> map = new HashMap<String, String>();
+		for (JField field : classType.getFields()) {
+			TSerializerImplicitCollection annotation = field.getAnnotation(TSerializerImplicitCollection.class);
+			if (annotation != null && (annotation.mode() == Mode.BOTH || annotation.mode() == mode) && !annotation.itemFieldName().isEmpty()) {
+				map.put(annotation.itemFieldName(), field.getName());
+			}
+		}
+		return map;
+	}
+	
+	protected boolean isImplicitCollectionFieldForDeserialization(JField field) {
+		return field.isAnnotationPresent(TSerializerImplicitCollection.class) &&
+		(field.getAnnotation(TSerializerImplicitCollection.class).mode() == Mode.BOTH || 
+		field.getAnnotation(TSerializerImplicitCollection.class).mode() == Mode.DESERIALIZATION);
+	}
+	
+	protected boolean isDeserializable(JClassType classType) {
+		return classType.isAssignableTo(deserializableType) ||
+				(classType.isEnum() != null) ||
+				classType.isAssignableTo(typeOracle.findType(java.util.Set.class.getName()));
+	}
+	
+	protected void fieldNotSupported(JClassType classType, JField field, SourceWriter sw, TreeLogger logger, Type type) {
+		String reason = getReason(field);
+		if (reason != null) {
+			logger.log(type, field.getName() + "@" + classType.getParameterizedQualifiedSourceName() + " won't be deserialized. Reason: " + getReason(field) + ".");
+		}
+	}
+	
+	protected String getReason(JField field) {
+		
+		//normal behaivour
+		if (field.isTransient()) return null;
+		if (field.isStatic()) return null;
+		
+		
+		if (field.isPrivate()) return "is private";
+		if (field.isProtected()) return "is protected";
+		if (field.isFinal()) return "is final";
+		if (field.isAnnotationPresent(TSerializerOmitField.class) &&
+		(field.getAnnotation(TSerializerOmitField.class).value() == Mode.SERIALIZATION ||
+		field.getAnnotation(TSerializerOmitField.class).value() == Mode.BOTH)) return "annotation \'OmitField\' is present";
+		if (field.getType().isAnnotation() != null) return "is annotation";
+		if (field.getType().isGenericType() != null) return "is genericType";
+		if (field.getType().isInterface() != null) return "is interface";
+		if (field.getType().isPrimitive() != null) return "is primitive";
+		if (field.getType().isRawType() != null) return "is rawType";
+		if (field.getType().isTypeParameter() != null) return "is typeParameter";
+		if (field.getType().isWildcard() != null) return "is wildcard";
+		
+		return "unknown";
+	}
+	
+	private void writeClassNamesMap() {
+		for (JClassType classType : typeOracle.getTypes()) {
+			if (classType.isClass() != null &&
+				classType.isAbstract() == false &&
+				classType.getAnnotation(TSerializerAlias.class) != null) {
+				sw.println("classNamesMap.put(\"" + getGWTClassName(classType) + "\", \"" + classType.getAnnotation(TSerializerAlias.class).value() + "\");");
+			}
+		}
+	}
+	
+	public static String getGWTClassName(JType classType) {
+//		if (classType.isClassOrInterface() != null && classType.isClassOrInterface().isMemberType()) {
+//			return classType.isClassOrInterface().getEnclosingType().getQualifiedBinaryName() + "$" + classType.getSimpleSourceName();
+//		} else {
+		if (classType.isArray() != null) {
+			String bracket = "";
+			for (int i = 0; i < classType.isArray().getRank(); ++i) bracket += "[";
+			if (classType.isArray().getComponentType().isPrimitive() != null) {
+				return bracket + classType.isArray().getComponentType().isPrimitive().getSimpleSourceName().substring(0, 1).toUpperCase();
+			} else {
+				return bracket + "L" + getGWTClassName(classType.isArray().getComponentType());
+			}
+		} else {
+			return classType.getQualifiedBinaryName();
+		}
+	}
+	
+	protected void logUnserializableField(JClassType classType, JField field) {
+		if (isSerializable(field)) {
+			logger.log(TreeLogger.ERROR, "This field will be not serialized: " + field.getName() + "@" + classType.getParameterizedQualifiedSourceName());
+			logger.log(TreeLogger.ERROR, "isClass: " + (field.getType().isClass() != null));
+			logger.log(TreeLogger.ERROR, "isInterface: " + (field.getType().isInterface() != null));
+			logger.log(TreeLogger.ERROR, "isTypeParameter: " + (field.getType().isTypeParameter() != null));
+		}
+	}
+	
+	protected boolean isSerializable(JField field) {
+		return 
+			field.isPublic() &&
+			field.isStatic() == false &&
+			field.isTransient() == false &&
+			(field.isAnnotationPresent(TSerializerOmitField.class) == false ||
+					(field.getAnnotation(TSerializerOmitField.class).value() != Mode.SERIALIZATION &&
+					field.getAnnotation(TSerializerOmitField.class).value() != Mode.BOTH));
+	}
+
+	protected boolean isDeserializable(JField field) {
+		return field.isPublic()
+				&& field.isFinal() == false
+				&& field.isStatic() == false
+				&& field.isTransient() == false
+				&& (field.isAnnotationPresent(TSerializerOmitField.class) == false ||
+						(field.getAnnotation(TSerializerOmitField.class).value() != Mode.DESERIALIZATION &&
+						field.getAnnotation(TSerializerOmitField.class).value() != Mode.BOTH));
+	}
+
+	protected String getFieldNameForSerialization(JField field) {
+		if (field.isAnnotationPresent(TSerializerAlias.class) && (
+				field.getAnnotation(TSerializerAlias.class).mode() == Mode.BOTH ||
+				field.getAnnotation(TSerializerAlias.class).mode() == Mode.SERIALIZATION)) {
+			return field.getAnnotation(TSerializerAlias.class).value();
+		} else {
+			return field.getName();
+		}
+	}
+	
+	protected boolean isFieldAsAttributeForSerialization(JField field) {
+		return field.getAnnotation(TSerializerAsAttribute.class) != null &&
+		(field.getAnnotation(TSerializerAsAttribute.class).mode().equals(Mode.BOTH) ||
+		field.getAnnotation(TSerializerAsAttribute.class).mode().equals(Mode.SERIALIZATION));
+	}
+	
+
+	
+}
