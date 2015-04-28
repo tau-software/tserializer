@@ -59,6 +59,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 			return null;
 		}
 		
+		@Override
 		public E deserialize(Node node, E instance) {
 			return valueOf(getTextNodeValue(node));
 		}
@@ -70,6 +71,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 	@SuppressWarnings("rawtypes")
 	private abstract class CollectionDeserializator<C extends Collection> extends XMLDeserializator<Collection, C> {
 		
+		@Override
 		public C deserialize(Node node, C instance) {
 			NodeList nodeList = node.getChildNodes();
 			for (int i = 0; i < nodeList.getLength(); ++i) {
@@ -81,6 +83,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 			return instance;
 		};
 		
+		@Override
 		@SuppressWarnings("unchecked")
 		protected boolean deserializeField(Node n, String fieldName, C instance) {
 			return instance.add(fromXML(n, n.getNodeName()));
@@ -92,6 +95,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public abstract class MapDeserializator<M extends Map> extends XMLDeserializator<Map, M> {
 		
+		@Override
 		public M deserialize(Node node, M instance) {
 			NodeList nodeList = node.getChildNodes();
 			for (int i = 0; i < nodeList.getLength(); ++i) {
@@ -401,6 +405,18 @@ public class XMLSerializerImpl implements XMLSerializer {
 		deserializators.put(Date.class.getName(), deserializator);
 		deserializators.put("date", deserializator);
 		
+		deserializator = new XMLDeserializator<Object, Void>() {
+			@Override
+			public Void deserialize(Node node, Void instance) {
+				return instance;
+			}
+			@Override
+			public Void makeInstance() {
+				return null;
+			}
+		};
+		deserializators.put("null", deserializator);
+		
 		serializators.put(String.class.getName(), new XMLSerializator<Object, String>() {
 			@Override
 			public Element serialize(String instance, Element classNode, String className) {
@@ -601,8 +617,8 @@ public class XMLSerializerImpl implements XMLSerializer {
 	}
 
 	protected <T> T deserialize(Node node, XMLDeserializator<? super T, T> deserializator) {
-		T instance = (T) deserializator.makeInstance();
-		return (T) deserializator.deserialize(node, instance);
+		T instance = deserializator.makeInstance();
+		return deserializator.deserialize(node, instance);
 	}
 
 	@SuppressWarnings("rawtypes")
