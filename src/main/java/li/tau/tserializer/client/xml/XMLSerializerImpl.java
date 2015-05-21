@@ -191,7 +191,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 		deserializator = new XMLDeserializator<Object, double[]>() {
 			@Override
 			public double[] deserialize(Node node, double[] instance) {
-				JSONArray array = JSONParser.parseStrict(getTextNodeValue(node)).isArray();
+				JSONArray array = JSONParser.parseLenient(getTextNodeValue(node)).isArray();
 				double[] result = new double[array.size()];
 				for (int i = 0; i < array.size(); ++i) {
 					result[i] = array.get(i).isNumber().doubleValue();
