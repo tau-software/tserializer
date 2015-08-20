@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import li.tau.tserializer.client.TSerializerException;
 import li.tau.tserializer.client.TextNodeImpl;
 
 import com.google.gwt.core.client.GWT;
@@ -605,7 +606,13 @@ public class XMLSerializerImpl implements XMLSerializer {
 	@Override
 	public Object fromString(String str) {
 		if (str == null || str.trim().isEmpty()) return null;
-		return fromXML(XMLParser.parse(str).getDocumentElement());
+		try {
+			return fromXML(XMLParser.parse(str).getDocumentElement());
+		} catch (TSerializerException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new TSerializerException("Problem with string deserialization: " + str, e);
+		}
 	}
 	
 	@Override
