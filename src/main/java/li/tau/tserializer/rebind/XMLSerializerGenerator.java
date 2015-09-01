@@ -127,7 +127,8 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 									} else {
 										deserializationUnit.writeDeserializableDeserializator(classType, field, sw);
 									}
-								} else if (fieldType.isParameterized().getTypeArgs()[0].isTypeParameter() != null) {
+								} else if (fieldType.isParameterized().getTypeArgs()[0].isTypeParameter() != null
+										|| fieldType.isParameterized().getTypeArgs()[0].isArray() != null) {
 									if (isImplicitCollectionFieldForDeserialization(field)) {
 										deserializationUnit.writeImplicitRawArrayListDeserializator(classType, field, sw);
 									} else {

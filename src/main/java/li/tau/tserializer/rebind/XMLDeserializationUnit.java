@@ -184,15 +184,16 @@ public class XMLDeserializationUnit {
 
 	void writeRawArrayListDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
-		sw.println("instance." + field.getName() + " = new " + java.util.ArrayList.class.getName() + "();");
 		sw.println("NodeList nodeList = node.getChildNodes();");
+		sw.println("ArrayList tempList = new ArrayList();");
 		sw.println("for (int i = 0; i < nodeList.getLength(); ++i) {");
 			sw.indent();
 			sw.println("if (nodeList.item(i).getNodeType() == Node.ELEMENT_NODE) {");
 				sw.indent();
-				sw.println("instance." + field.getName() + ".add(fromXML(nodeList.item(i), nodeList.item(i).getNodeName()));");
+				sw.println("tempList.add(fromXML(nodeList.item(i)));");
 				sw.outdent();
 			sw.println("}");
+			writeAssignExpression(field, sw, "tempList");
 			sw.outdent();
 		sw.println("}");
 		writeSetterSuffix(classType, field, sw);

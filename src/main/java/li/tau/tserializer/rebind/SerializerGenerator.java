@@ -234,10 +234,10 @@ public abstract class SerializerGenerator extends Generator {
 		if (field.isStatic()) return null;
 		
 		
-		if (field.isPrivate()) {
-			return "is private, has setter = " + hasSetter(field);
+		if (field.isPrivate() && !hasSetter(field)) {
+			return "is private";
 		}
-		if (field.isProtected()) return "is protected";
+		if (field.isProtected() && !hasSetter(field)) return "is protected";
 		if (field.isFinal()) return "is final";
 		if (field.isAnnotationPresent(TSerializerOmitField.class) &&
 		(field.getAnnotation(TSerializerOmitField.class).value() == Mode.SERIALIZATION ||

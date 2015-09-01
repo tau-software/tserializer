@@ -189,6 +189,18 @@ public class XMLSerializerImpl implements XMLSerializer {
 		};
 		deserializators.put("int", deserializator);
 		
+		deserializator = new XMLDeserializator<Object, Long>() {
+			@Override
+			public Long deserialize(Node node, Long instance) {
+				return new Long(getTextNodeValue(node));
+			}
+			@Override
+			public Long makeInstance() {
+				return null;
+			}
+		};
+		deserializators.put("long", deserializator);
+
 		deserializator = new XMLDeserializator<Object, double[]>() {
 			@Override
 			public double[] deserialize(Node node, double[] instance) {
@@ -242,6 +254,26 @@ public class XMLSerializerImpl implements XMLSerializer {
 			}
 		};
 		deserializators.put("date-array", deserializator);
+		
+		deserializator = new XMLDeserializator<Object, Object[]>() {
+			@Override
+			public Object[] deserialize(Node node, Object[] instance) {
+				NodeList childNodes = node.getChildNodes();
+				Object[] result = new Object[childNodes.getLength()];
+				for (int i = 0; i < result.length; ++i) {
+					if (childNodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
+						result[i] = fromXML(childNodes.item(i));
+					}
+				}
+				return result;
+			}
+			@Override
+			public Object[] makeInstance() {
+				return null;
+			}
+		};
+		deserializators.put("object-array", deserializator);
+
 		
 		deserializator = new XMLDeserializator<Object, Double>() {
 			@Override
