@@ -330,6 +330,15 @@ public class XMLSerializerImpl implements XMLSerializer {
 		deserializators.put(Map.class.getName(), deserializator);
 		deserializators.put(HashMap.class.getName(), deserializator);
 		
+
+		deserializator = new MapDeserializator<LinkedHashMap>() {
+			@Override
+			public LinkedHashMap makeInstance() {
+				return new LinkedHashMap();
+			};
+		};
+		deserializators.put("linked-hash-map", deserializator);
+		
 		deserializator = new XMLDeserializator<AbstractMap, EnumMap>() {
 			@Override
 			public EnumMap makeInstance() {
