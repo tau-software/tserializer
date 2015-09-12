@@ -152,6 +152,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 			}
 		};
 		deserializators.put("sorted-set", deserializator);
+		deserializators.put(SortedSet.class.getName(), deserializator);
 		deserializators.put(TreeSet.class.getName(), deserializator);
 		
 		deserializator = new CollectionDeserializator<List>() {
@@ -319,7 +320,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 			};
 		};
 		deserializators.put(LinkedHashMap.class.getName(), deserializator);
-		
+
 		deserializator = new MapDeserializator<HashMap>() {
 			@Override
 			public HashMap makeInstance() {
