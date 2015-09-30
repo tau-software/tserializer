@@ -1,5 +1,7 @@
 package li.tau.tserializer.client.xml;
 
+import static com.google.gwt.xml.client.Node.ATTRIBUTE_NODE;
+
 import java.math.BigDecimal;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -615,8 +617,11 @@ public class XMLSerializerImpl implements XMLSerializer {
 		return DOCUMENT;
 	}
 
-	public static String getTextNodeValue(Node n) {
-		return TEXT_NODE_IMPL.getNodeValue(n);
+	public static String getTextNodeValue(Node node) {
+		if (node.getNodeType() == ATTRIBUTE_NODE) {
+			return node.getNodeValue();
+		}
+		return TEXT_NODE_IMPL.getNodeValue(node);
 	}
 
 	public static Double parseDouble(String text) {

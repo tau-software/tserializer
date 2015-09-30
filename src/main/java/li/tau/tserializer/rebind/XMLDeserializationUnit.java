@@ -36,7 +36,7 @@ public class XMLDeserializationUnit {
 		writeSetterSuffix(classType, field, sw);
 	}
 	
-	public void writeBooleanDeserializator(JClassType classType, JField field,	SourceWriter sw) {
+	public void writeBooleanDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
 		writeAssignExpression(field, sw, "Boolean.parseBoolean(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
@@ -48,19 +48,19 @@ public class XMLDeserializationUnit {
 		writeSetterSuffix(classType, field, sw);
 	}
 	
-	public void writeCharacterDeserializator(JClassType classType, JField field,	SourceWriter sw) {
+	public void writeCharacterDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
 		writeAssignExpression(field, sw, "getTextNodeValue(node).charAt(0)");
 		writeSetterSuffix(classType, field, sw);
 	}
 
-	public void writeDoubleDeserializator(JClassType classType, JField field,	SourceWriter sw) {
+	public void writeDoubleDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
 		writeAssignExpression(field, sw, "parseDouble(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
 	}
 	
-	public void writeFloatDeserializator(JClassType classType, JField field,	SourceWriter sw) {
+	public void writeFloatDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
 		writeAssignExpression(field, sw, "Float.parseFloat(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
@@ -78,7 +78,7 @@ public class XMLDeserializationUnit {
 		writeSetterSuffix(classType, field, sw);
 	}
 	
-	public void writeIntegerDeserializator(JClassType classType, JField field,	SourceWriter sw) {
+	public void writeIntegerDeserializator(JClassType classType, JField field, SourceWriter sw) {
 		writeSetterPrefix(classType, field, sw);
 		writeAssignExpression(field, sw, "Integer.parseInt(getTextNodeValue(node))");
 		writeSetterSuffix(classType, field, sw);
