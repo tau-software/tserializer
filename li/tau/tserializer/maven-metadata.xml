@@ -3,10 +3,9 @@
   <groupId>li.tau</groupId>
   <artifactId>tserializer</artifactId>
   <versioning>
-    <release>1.1</release>
     <versions>
-      <version>1.1</version>
+      <version>1.2-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20150428193902</lastUpdated>
+    <lastUpdated>20151020145223</lastUpdated>
   </versioning>
 </metadata>
