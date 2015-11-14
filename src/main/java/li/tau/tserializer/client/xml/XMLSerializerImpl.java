@@ -450,6 +450,18 @@ public class XMLSerializerImpl implements XMLSerializer {
 		deserializators.put(Date.class.getName(), deserializator);
 		deserializators.put("date", deserializator);
 		
+		deserializator = new XMLDeserializator<Object, java.sql.Date>() {
+			@Override
+			public java.sql.Date deserialize(Node node, java.sql.Date instance) {
+				return java.sql.Date.valueOf(getTextNodeValue(node));
+			}
+			@Override
+			public java.sql.Date makeInstance() {
+				return null;
+			}
+		};
+		deserializators.put("sql-date", deserializator);
+		
 		deserializator = new XMLDeserializator<Object, Void>() {
 			@Override
 			public Void deserialize(Node node, Void instance) {
