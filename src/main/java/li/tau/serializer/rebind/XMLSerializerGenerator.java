@@ -1,5 +1,6 @@
 package li.tau.serializer.rebind;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
@@ -189,7 +190,8 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 									deserializationUnit.writeLongDeserializator(classType, field, sw);
 								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.lang.Integer.class.getName()))) {
 									deserializationUnit.writeIntegerDeserializator(classType, field, sw);
-								} else if (fieldClass.isAssignableTo(deserializableType)) {
+								} else if (fieldClass.isAssignableTo(typeOracle.findType(BigDecimal.class.getName()))
+										|| fieldClass.isAssignableTo(deserializableType)) {
 									deserializationUnit.writeDeserializableDeserializator(classType, field, sw);
 								} else {
 									fieldNotSupported(classType, field, sw, logger, Type.ERROR);
@@ -247,6 +249,7 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 		sw.println();
 	}
 	
+	@Override
 	protected void writeEnumDeserializator(JEnumType enumType) {
 		sw.println("deserializator = new EnumDeserializator<" + enumType.getQualifiedSourceName() + ">() {");
 			sw.indent();
