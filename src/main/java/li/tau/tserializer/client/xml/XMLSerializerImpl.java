@@ -146,6 +146,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 			}
 		};
 		deserializators.put(LinkedHashSet.class.getName(), deserializator);
+		deserializators.put("linked-hash-set", deserializator);
 		
 		deserializator = new CollectionDeserializator<SortedSet>() {
 			@Override
