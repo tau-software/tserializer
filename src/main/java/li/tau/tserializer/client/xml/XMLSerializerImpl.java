@@ -561,6 +561,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 				return classNode;
 			}
 	    });
+		classNamesMap.put(ArrayList.class.getName(), "list");
 		
 		serializators.put(Object[].class.getName(), new XMLSerializator<Object, Object[]>() {
 			@Override
