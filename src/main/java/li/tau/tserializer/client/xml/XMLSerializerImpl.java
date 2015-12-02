@@ -50,6 +50,7 @@ public class XMLSerializerImpl implements XMLSerializer {
 	@SuppressWarnings("rawtypes")
 	protected final HashMap<String, XMLDeserializator> deserializators = new HashMap<String, XMLDeserializator>();
 
+	protected static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd");
 	protected static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss.SSS Z");
 	protected static final Double NaN = new Double(0.0d / 0.0d);
 	protected static final TextNodeImpl TEXT_NODE_IMPL = GWT.create(TextNodeImpl.class);
@@ -536,7 +537,16 @@ public class XMLSerializerImpl implements XMLSerializer {
 			}
 	    });
 		classNamesMap.put(Date.class.getName(), "date");
-		
+
+		serializators.put(java.sql.Date.class.getName(), new XMLSerializator<Object, java.sql.Date>() {
+			@Override
+			public Element serialize(java.sql.Date instance, Element classNode, String className) {
+				appendTextNodeToElement(classNode, DATE_FORMAT.format(instance));
+				return classNode;
+			}
+	    });
+		classNamesMap.put(java.sql.Date.class.getName(), "sql-date");
+
 		serializators.put(ArrayList.class.getName(), new XMLSerializator<Object, ArrayList>() {
 			@Override
 			public Element serialize(ArrayList instance, Element classNode, String className) {
