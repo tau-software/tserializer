@@ -58,6 +58,12 @@ public class XMLSerializerImpl implements XMLSerializer {
 	@SuppressWarnings("rawtypes")
 	protected abstract class EnumDeserializator<E extends Enum> extends XMLDeserializator<Enum, E> {
 		
+		private final Class<E> enumClass;
+		
+		public EnumDeserializator(Class<E> enumClass) {
+			this.enumClass = enumClass;
+		}
+		
 		@Override
 		public E makeInstance() {
 			return null;
@@ -66,6 +72,10 @@ public class XMLSerializerImpl implements XMLSerializer {
 		@Override
 		public E deserialize(Node node, E instance) {
 			return valueOf(getTextNodeValue(node));
+		}
+		
+		public Class<E> getEnumClass() {
+			return enumClass;
 		}
 
 		public abstract E valueOf(String enumName);
@@ -407,13 +417,6 @@ public class XMLSerializerImpl implements XMLSerializer {
 			@SuppressWarnings("unchecked")
 			@Override
 			public EnumSet deserialize(Node node, EnumSet instance) {
-				if (node.hasChildNodes() == false) {
-					LOGGER.log(Level.WARNING, "EnumSet instance without elements: " + node.getNodeValue());
-					return null;
-				}
-				
-				List enumList = new ArrayList();
-				
 				String enumType = node.getAttributes().getNamedItem("enum-type").getNodeValue();
 				XMLDeserializator deserializator = deserializators.get(enumType);
 				
@@ -426,6 +429,13 @@ public class XMLSerializerImpl implements XMLSerializer {
 					LOGGER.log(Level.SEVERE, "Wrong type of deserializtor for type: " + enumType);
 					return null;
 				}
+				
+				if (node.hasChildNodes() == false) {
+					LOGGER.log(Level.FINE, "EnumSet instance without elements: " + node.getNodeValue());
+					return EnumSet.noneOf(((EnumDeserializator) deserializator).getEnumClass());
+				}
+				
+				List enumList = new ArrayList();
 				
 				EnumDeserializator enumDeserializator = (EnumDeserializator)deserializator;
 				

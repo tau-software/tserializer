@@ -258,7 +258,7 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 	
 	@Override
 	protected void writeEnumDeserializator(JEnumType enumType) {
-		sw.println("deserializator = new EnumDeserializator<" + enumType.getQualifiedSourceName() + ">() {");
+		sw.println("deserializator = new EnumDeserializator<%1$s>(%1$s.class) {", enumType.getQualifiedSourceName());
 			sw.indent();
 			sw.println();
 			sw.println("@Override");
