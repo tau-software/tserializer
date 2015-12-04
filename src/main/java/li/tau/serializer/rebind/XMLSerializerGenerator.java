@@ -191,7 +191,8 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 								} else if (fieldClass.isAssignableTo(typeOracle.findType(java.lang.Integer.class.getName()))) {
 									deserializationUnit.writeIntegerDeserializator(classType, field, sw);
 								} else if (fieldClass.isAssignableTo(typeOracle.findType(BigDecimal.class.getName()))
-										|| fieldClass.isAssignableTo(deserializableType)) {
+										|| fieldClass.isAssignableTo(deserializableType)
+										|| fieldClass.getSuperclass() == null) {
 									deserializationUnit.writeDeserializableDeserializator(classType, field, sw);
 								} else {
 									fieldNotSupported(classType, field, sw, logger, Type.ERROR);
