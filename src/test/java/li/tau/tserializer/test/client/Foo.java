@@ -2,8 +2,8 @@ package li.tau.tserializer.test.client;
 
 import java.util.Date;
 
-import li.tau.tserializer.client.annotation.TDeserializable;
-import li.tau.tserializer.client.annotation.TSerializable;
+import li.tau.serializer.client.annotation.TDeserializable;
+import li.tau.serializer.client.annotation.TSerializable;
 
 public class Foo implements TSerializable, TDeserializable {
 	

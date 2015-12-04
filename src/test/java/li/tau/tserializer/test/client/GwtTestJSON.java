@@ -1,7 +1,7 @@
 package li.tau.tserializer.test.client;
 
-import li.tau.tserializer.client.TSerializer;
-import li.tau.tserializer.client.json.JSONSerializerImpl;
+import li.tau.serializer.client.Serializer;
+import li.tau.serializer.client.json.JSONSerializerImpl;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -12,13 +12,13 @@ import com.google.gwt.junit.client.GWTTestCase;
 @Ignore
 public class GwtTestJSON extends GWTTestCase {
 	
-	TSerializer serializer;
+	Serializer serializer;
 	Foo foo;
 	
 	@Override
 	protected void gwtSetUp() throws Exception {
 		super.gwtSetUp();
-		serializer = GWT.create(TSerializer.class);
+		serializer = GWT.create(Serializer.class);
 		this.foo = Foo.get();
 	}
 

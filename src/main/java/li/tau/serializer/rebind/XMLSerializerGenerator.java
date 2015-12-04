@@ -98,9 +98,9 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 						&& field.isStatic() == false
 						&& field.isTransient() == false
 						&& field.isEnumConstant() == null
-						&& (field.isAnnotationPresent(TSerializerOmitField.class) == false ||
-								(field.getAnnotation(TSerializerOmitField.class).value() != Mode.DESERIALIZATION &&
-								field.getAnnotation(TSerializerOmitField.class).value() != Mode.BOTH))) {
+						&& (field.isAnnotationPresent(TSerializerOmitField.class) == false
+							|| field.getAnnotation(TSerializerOmitField.class).value() == Mode.SERIALIZATION)) {
+						
 						if (fieldType.isArray() != null) {
 							if (fieldType.isArray().getComponentType().getQualifiedSourceName().equals(Integer.TYPE.getName())) {
 								deserializationUnit.writePrimitiveIntegerArrayDeserializator(classType, field, sw);
@@ -111,8 +111,9 @@ public class XMLSerializerGenerator extends SerializerGenerator {
 							} else {
 								deserializationUnit.writeArrayDeserializator(classType, field, sw);
 							}
-						} else if (fieldType.isClassOrInterface() != null && fieldType.isClassOrInterface().isAssignableTo(typeOracle.findType(java.util.List.class.getName()))
-									&& !isDeserializable(fieldType.isClassOrInterface())) {
+						} else if (fieldType.isClassOrInterface() != null
+								&& fieldType.isClassOrInterface().isAssignableTo(typeOracle.findType(java.util.List.class.getName()))
+								&& !isDeserializable(fieldType.isClassOrInterface())) {
 							if (fieldType.isParameterized() != null) {
 								if (fieldType.isParameterized().getTypeArgs()[0].isAssignableTo(deserializableType) &&
 									fieldType.isParameterized().getTypeArgs()[0].isTypeParameter() == null) {

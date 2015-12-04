@@ -11,7 +11,7 @@
 
 	<properties>
 		<build.name>serializer</build.name>
-		<gwt.version>2.7.0</gwt.version>
+		<gwt.version>2.6.0</gwt.version>
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
