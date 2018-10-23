@@ -4,8 +4,8 @@
   <artifactId>serializer</artifactId>
   <versioning>
     <versions>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>0.0.3-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20151204095952</lastUpdated>
+    <lastUpdated>20181023215801</lastUpdated>
   </versioning>
 </metadata>
